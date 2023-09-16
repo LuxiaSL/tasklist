@@ -40,8 +40,10 @@ function createTask(e) {
 	const template = `
 <div id='${task_id}'  data-branch='${new_branch}' data-parent-task-id='${parent_id}' class='task-container' style='padding-left:${padding}em'>
 	<div class='task-content'>
-		<div class='task-checkbox'><input type="checkbox" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
-		<div class='task-text'><input id='txt-${task_id}' class="task-text-input" data-task-id='${task_id}' type='text' placeholder='...' onblur='editTaskText(event)'></div>
+		<div class='task-text'>
+            <div class='task-checkbox'><input type="checkbox" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
+            <input id='txt-${task_id}' class="task-text-input" data-task-id='${task_id}' type='text' placeholder='...' onblur='editTaskText(event)'>
+        </div>
 		<div class='task-buttons'>
             <div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task_id}' onclick='editTask(event)'>&#9998;</button></div>
             <div class='del-task-div'><button class='del-task-btn' data-task-id='${task_id}' data-primed="false" onclick='deleteTask(event)'>&#10006;</button></div>
