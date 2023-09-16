@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Task List</title>
+	<script src='script.js'></script>
+	<link rel="stylesheet" href="styling.css">
+</head>
+<body>
+	<div class="button-container">
+		<div class='add-task-div'>
+			<button class="add-task-btn" id="main-task-add" data-task-id="0" data-branch="0" onclick="createTask(event)">New Task</button>
+		</div>
+		<div class='clipboard-div'>
+			<button id='save-to-clipboard' onclick="saveData('clipboard')">Export to Clipboard</button>
+			<button id='load-from-clipboard' onclick="importData('clipboard')">Import from Clipboard</button>
+		</div>
+		<div class='browser-div'>
+			<button id='autosave' onclick="toggleAutosave()">Autosave: ✖</button>
+			<button id='save-to-browser' onclick="saveData('browser')">Save to Browser</button>
+			<button id='load-from-browser' onclick="importData('browser')">Load from Browser</button>
+		</div>
+		<div class="settings-div">
+			<label for="toggle-hidden">Show Completed</label>
+			<input type="checkbox" id="toggle-hidden" checked onclick="toggleShowCompleted()" />
+		</div>
+	</div>
+	<br>
+	<div id="0" data-branch='0' data-parent-task-id='null' class='main-task-container'>
+		<div class='incompleted-tasks' id="sub-0"></div>
+		<div class='completed-tasks' id="comp-sub-0"></div>
+	</div>
+</body>
+</html>
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		importData('browser');
+	});
+</script>
