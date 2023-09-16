@@ -6,8 +6,8 @@ with above, settings which show goes into, as well as autosave, etc...
 shift-click task up/down = 5
 ctrl = top/bottom
 collapse function, preferably on click of left side lines somehow
-
-ffs something broke to do with the sort and no errors, try and bugfix another time
+dynamic width on text-box to make it fill area 
+continue working on checkbox
 finish styling, make sure to match up templates
 */
 
@@ -41,7 +41,7 @@ function createTask(e) {
 <div id='${task_id}'  data-branch='${new_branch}' data-parent-task-id='${parent_id}' class='task-container' style='padding-left:${padding}em'>
 	<div class='task-content'>
 		<div class='task-text'>
-            <div class='task-checkbox'><input type="checkbox" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
+            <div class='task-checkbox'><input type="checkbox" class="task-toggle" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
             <input id='txt-${task_id}' class="task-text-input" data-task-id='${task_id}' type='text' placeholder='...' onblur='editTaskText(event)'>
         </div>
 		<div class='task-buttons'>
@@ -489,9 +489,11 @@ function createDOMElement(task, parentElement) {
     const template = `
 <div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container' style='padding-left:${padding}em'>
 	<div class='task-content'>
-		<div class='task-checkbox'><input type='checkbox' data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
-		<div class='task-text'><input class="task-text-input" id='txt-${task.id}' data-task-id='${task.id}' type='text' value='${task.text}' disabled placeholder='...' onblur='editTaskText(event)' /></div>
-		<div class='task-buttons'>
+		<div class='task-text'>
+            <div class='task-checkbox'><input type='checkbox' class="task-toggle" data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
+		    <input class="task-text-input" id='txt-${task.id}' data-task-id='${task.id}' type='text' value='${task.text}' disabled placeholder='...' onblur='editTaskText(event)' />
+        </div>
+        <div class='task-buttons'>
 			<div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task.id}' onclick='editTask(event)'>&#9998;</button></div>
 			<div class='del-task-div'><button class='del-task-btn' data-task-id='${task.id}' data-primed='false' onclick='deleteTask(event)'>&#10006;</button></div>
 			<button class='swap-button' data-raise='true' data-task-id='${task.id}' onclick='swapTask(event)'>▲</button>
