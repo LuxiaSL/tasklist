@@ -1,0 +1,54 @@
+/* Structural CSS */
+body{
+	background-color:#FFD1DA;
+}
+
+.task-container {
+	border-left: 0.33em solid #F7BEC0;
+}
+.task-container:hover {
+    border-left: 0.33em solid #F78FA7;
+}
+.is-collapsed{
+	border-left: 0.33em solid #F78FA7;
+}
+.is-collapsed:hover{
+    border-left: 0.33em solid #F45C85;
+}
+
+.task-text-input {
+	border-right: 0.125em solid #F7BEC0;
+}
+
+.task-text-input:hover,
+.task-text-input:focus {
+background-color: #F7BEC0;
+}
+
+.task-toggle {
+  background-color: #FEDFE1;
+}
+
+.task-toggle:hover {
+  background-color: #F7BEC0;
+}
+
+.task-toggle:checked {
+  background-color: #F78FA7;
+}
+
+.task-toggle:checked:hover{
+	background-color: #F45C85;
+}
+
+.edit-task-btn, .del-task-btn, .swap-button {
+	border: 1px solid #F7BEC0;
+}
+
+.edit-task-btn:hover, .del-task-btn:hover, .swap-button:hover {
+	background-color: #FEDFE1;
+}
+
+.delete-primed:hover{
+	background-color:#CB1B45;
+}

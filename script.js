@@ -4,10 +4,9 @@ custom window to popup instead of shitty browser one
 with above, settings which show goes into, as well as autosave, etc...  
 general modal for the above
 
-dynamic width on text-box to make it fill area
-finish styling, make sure to match up templates
 details button, opens up large <area> below for extra details/description
-replace edit button with onclick after hover on box
+
+genTemplate that can be called by createTask and createDOMElement to fill template accordingly, feed in the functions and template, make sure to specify the need for ternary in load to keep state
 */
 
 // Initialize empty task array
@@ -230,20 +229,6 @@ function toggleTaskCollapse(e) {
         container_div.classList.toggle('is-collapsed');
 
         autosave();
-
-        /*
-        // Toggle the 'collapsed' class
-        //replace with code to access subtasks container
-        e.target.classList.toggle('collapsed');
-
-        // Update the 'collapsed' property of the task object
-        const task_id = Number(e.currentTarget.id);
-        const task = findTaskObject(task_id);
-        if (task) {
-            task.collapsed = !task.collapsed;
-            autosave(); // Save the new state
-        }
-        */
     }
 }
 

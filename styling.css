@@ -50,6 +50,7 @@ body{
 .task-text {
 	display:flex;
 	flex-direction: row;
+	flex-grow:1;
 	align-items: center;
 }
 .task-text > *{
@@ -129,7 +130,7 @@ body{
   
 .task-text-input:hover,
 .task-text-input:focus {
-background-color: #f0f0f0;
+background-color: #bfbfbf;
 }
 
 .task-toggle {
@@ -157,13 +158,12 @@ background-color: #f0f0f0;
 	background-color: #ababab;
 }
 
-/* Custom checkmark */
 .task-toggle:checked::after {
   content: '✔';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #000; /* or any color you prefer */
-  font-size: 1.05em; /* adjust size to fit within the checkbox */
+  color: #000; 
+  font-size: 1.05em; 
 }
