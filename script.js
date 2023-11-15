@@ -5,8 +5,6 @@ with above, settings which show goes into, as well as autosave, etc...
 general modal for the above
 
 details button, opens up large <area> below for extra details/description
-
-genTemplate that can be called by createTask and createDOMElement to fill template accordingly, feed in the functions and template, make sure to specify the need for ternary in load to keep state
 */
 
 // Initialize empty task array
@@ -17,6 +15,36 @@ let task_increment = 1;
 let autosave_enabled=false;
 //completes?
 let show_completed=true;
+
+//template for the createTask and createDOMElement function; structure of the page
+function generateTaskTemplate(task) {
+    // Calculate depth and padding based on the branch
+    let depth = task.branch.split(',').length - 1;
+    depth = (depth >= 0 ? depth : 0);
+    let padding = (depth <= 0 ? 0 : 2);
+
+    return `
+<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container ${task.collapsed ? 'is-collapsed' : ''}' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
+    <div class='task-content'>
+        <div class='task-text'>
+            <div class='task-checkbox'><input type='checkbox' class="task-toggle" data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
+            <input class="task-text-input" id='txt-${task.id}' data-task-id='${task.id}' type='text' value='${task.text}' disabled placeholder='...' onblur='editTaskText(event)' />
+        </div>
+        <div class='task-buttons'>
+            <div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task.id}' onclick='editTask(event)'>&#9998;</button></div>
+            <div class='del-task-div'><button class='del-task-btn' data-task-id='${task.id}' data-primed='false' onclick='deleteTask(event)'>&#10006;</button></div>
+            <button class='swap-button' data-raise='true' data-task-id='${task.id}' onclick='listenSwap(event)'>▲</button>
+            <button class='swap-button' data-raise='false' data-task-id='${task.id}' onclick='listenSwap(event)'>▼</button>
+        </div>
+    </div>
+    <div class='add-task-div ${task.collapsed ? 'collapsed' : ''}'><button class='add-task-btn' data-task-id='${task.id}' data-branch='${task.branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
+    <div class='subtasks ${task.collapsed ? 'collapsed' : ''}'>
+        <div class='incompleted-tasks' id='sub-${task.id}' data-parent-task-id='${task.id}'></div>
+        <div class='completed-tasks' id='comp-sub-${task.id}' data-parent-task-id='${task.id}'></div>
+    </div>
+</div>`;
+}
+
 // Function to create task and subtask
 function createTask(e) {
 	let btn = e.target;
@@ -34,33 +62,14 @@ function createTask(e) {
 	//determine padding for task. if neg, set to 0.
 	let padding = (depth <= 0 ? 0 : 2);
 
+    // Create new task object
+    let task_obj = {text:"", parent_task_id:parent_id, id:task_id, subtasks:{complete:[],incomplete:[]}, complete:false, branch:new_branch, collapsed:false};
+	
 	//task template
-	const template = `
-<div id='${task_id}'  data-branch='${new_branch}' data-parent-task-id='${parent_id}' class='task-container' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
-	<div class='task-content'>
-		<div class='task-text'>
-            <div class='task-checkbox'><input type="checkbox" class="task-toggle" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
-            <input id='txt-${task_id}' class="task-text-input" data-task-id='${task_id}' type='text' placeholder='...' onblur='editTaskText(event)'>
-        </div>
-		<div class='task-buttons'>
-            <div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task_id}' onclick='editTask(event)'>&#9998;</button></div>
-            <div class='del-task-div'><button class='del-task-btn' data-task-id='${task_id}' data-primed="false" onclick='deleteTask(event)'>&#10006;</button></div>
-            <button class='swap-button' data-raise='true' data-task-id='${task_id}' onclick='listenSwap(event)'>▲</button>
-            <button class='swap-button' data-raise='false' data-task-id='${task_id}' onclick='listenSwap(event)'>▼</button>
-        </div>
-	</div>
-    <div class='add-task-div'><button class='add-task-btn' data-task-id='${task_id}' data-branch='${new_branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
-    <div class='subtasks'>
-        <div class='incompleted-tasks' id='sub-${task_id}' data-parent-task-id='${task_id}'></div>
-        <div class='completed-tasks' id='comp-sub-${task_id}' data-parent-task-id='${task_id}'></div>
-    </div>
-</div>`
+	const template = generateTaskTemplate(task_obj);
 
 	//access parent DOM container and insert template
 	document.getElementById(`sub-${parent_id}`).insertAdjacentHTML('beforeend', template);
-	
-    // Create new task object
-    let task_obj = {text:"", parent_task_id:parent_id, id:task_id, subtasks:{complete:[],incomplete:[]}, complete:false, branch:new_branch, collapsed:false};
 
     //put user in new task box
     document.getElementById(`txt-${task_id}`).focus();
@@ -207,6 +216,7 @@ function swapTask(btn, swapType) {
 
 // This function toggles the collapsed state of a task
 function toggleTaskCollapse(e) {
+    e.stopPropagation();
     // Check if the click was on the left side of the div
     if (e.offsetX <= 5) {
         let container_div = e.target;
@@ -541,26 +551,7 @@ function createDOMElement(task, parentElement) {
 	let padding = (depth <= 0 ? 0 : 2);
 
     // Create a new task element using the same template as in 'createTask'
-    const template = `
-<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container ${task.collapsed ? 'is-collapsed' : ''}' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
-	<div class='task-content'>
-		<div class='task-text'>
-            <div class='task-checkbox'><input type='checkbox' class="task-toggle" data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
-		    <input class="task-text-input" id='txt-${task.id}' data-task-id='${task.id}' type='text' value='${task.text}' disabled placeholder='...' onblur='editTaskText(event)' />
-        </div>
-        <div class='task-buttons'>
-			<div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task.id}' onclick='editTask(event)'>&#9998;</button></div>
-			<div class='del-task-div'><button class='del-task-btn' data-task-id='${task.id}' data-primed='false' onclick='deleteTask(event)'>&#10006;</button></div>
-			<button class='swap-button' data-raise='true' data-task-id='${task.id}' onclick='listenSwap(event)'>▲</button>
-			<button class='swap-button' data-raise='false' data-task-id='${task.id}' onclick='listenSwap(event)'>▼</button>
-		</div>
-	</div>
-    <div class='add-task-div ${task.collapsed ? 'collapsed' : ''}'><button class='add-task-btn' data-task-id='${task.id}' data-branch='${task.branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
-    <div class='subtasks ${task.collapsed ? 'collapsed' : ''}'>
-        <div class='incompleted-tasks' id='sub-${task.id}' data-parent-task-id='${task.id}'></div>
-        <div class='completed-tasks' id='comp-sub-${task.id}' data-parent-task-id='${task.id}'></div>
-    </div>
-</div>`;
+    const template = generateTaskTemplate(task);
 
     // Check for task completion status and append accordingly
     const sub_container_id = task.complete ? `comp-sub-${task.parent_task_id}` : `sub-${task.parent_task_id}`;
