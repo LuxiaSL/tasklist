@@ -23,7 +23,6 @@
 		</div>
 		<div class="settings-div">
 			<label for="toggle-hidden">Show Completed</label>
-			<input type="checkbox" id="toggle-hidden" checked onclick="toggleShowCompleted()" />
 		</div>
 	</div>
 	<br>
@@ -36,5 +35,6 @@
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		importData('browser');
+		document.querySelector('.settings-div').insertAdjacentHTML('beforeend', `<input type="checkbox" id="toggle-hidden" ${show_completed ? "checked" : ''} onclick="toggleShowCompleted()" />`);
 	});
 </script>

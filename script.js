@@ -1,18 +1,17 @@
 /*
 todo: 
-prettify the site once completed (minimalist, text-based design, flush buttons and entries, etc)
 custom window to popup instead of shitty browser one
 with above, settings which show goes into, as well as autosave, etc...  
-shift-click task up/down = 5
-ctrl = top/bottom
-collapse function, preferably on click of left side lines somehow
-dynamic width on text-box to make it fill area 
-continue working on checkbox
+general modal for the above
+
+dynamic width on text-box to make it fill area
 finish styling, make sure to match up templates
+details button, opens up large <area> below for extra details/description
+replace edit button with onclick after hover on box
 */
 
 // Initialize empty task array
-let tasks = [{text:"", parent_task_id:null, id:0, subtasks:{complete:[],incomplete:[]}, complete:false, branch:'0'}];
+let tasks = [{text:"", parent_task_id:null, id:0, subtasks:{complete:[],incomplete:[]}, complete:false, branch:'0', collapsed:false}];
 // incrementer
 let task_increment = 1;
 // autosave enabled?
@@ -38,7 +37,7 @@ function createTask(e) {
 
 	//task template
 	const template = `
-<div id='${task_id}'  data-branch='${new_branch}' data-parent-task-id='${parent_id}' class='task-container' style='padding-left:${padding}em'>
+<div id='${task_id}'  data-branch='${new_branch}' data-parent-task-id='${parent_id}' class='task-container' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
 	<div class='task-content'>
 		<div class='task-text'>
             <div class='task-checkbox'><input type="checkbox" class="task-toggle" data-task-id='${task_id}' onclick="toggleTaskCompletion(event)" /></div>
@@ -47,8 +46,8 @@ function createTask(e) {
 		<div class='task-buttons'>
             <div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task_id}' onclick='editTask(event)'>&#9998;</button></div>
             <div class='del-task-div'><button class='del-task-btn' data-task-id='${task_id}' data-primed="false" onclick='deleteTask(event)'>&#10006;</button></div>
-            <button class='swap-button' data-raise='true' data-task-id='${task_id}' onclick='swapTask(event)'>▲</button>
-            <button class='swap-button' data-raise='false' data-task-id='${task_id}' onclick='swapTask(event)'>▼</button>
+            <button class='swap-button' data-raise='true' data-task-id='${task_id}' onclick='listenSwap(event)'>▲</button>
+            <button class='swap-button' data-raise='false' data-task-id='${task_id}' onclick='listenSwap(event)'>▼</button>
         </div>
 	</div>
     <div class='add-task-div'><button class='add-task-btn' data-task-id='${task_id}' data-branch='${new_branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
@@ -62,7 +61,7 @@ function createTask(e) {
 	document.getElementById(`sub-${parent_id}`).insertAdjacentHTML('beforeend', template);
 	
     // Create new task object
-    let task_obj = {text:"", parent_task_id:parent_id, id:task_id, subtasks:{complete:[],incomplete:[]}, complete:false, branch:new_branch};
+    let task_obj = {text:"", parent_task_id:parent_id, id:task_id, subtasks:{complete:[],incomplete:[]}, complete:false, branch:new_branch, collapsed:false};
 
     //put user in new task box
     document.getElementById(`txt-${task_id}`).focus();
@@ -139,51 +138,115 @@ function editTaskText(e){
 	modifyTaskObject(task_id, branch, 'text', text_input.value);
 }
 
-//function to shift according to which button was clicked & where
-function swapTask(e) {
-    //variable declarations
+//functions to listen & shift according to which button was clicked & where
+function listenSwap(e){
     let btn = e.target;
+    if(e.shiftKey){
+        swapTask(btn, 'shift');
+    }else if(e.ctrlKey){
+        swapTask(btn, 'ctrl');
+    }else{
+        swapTask(btn, 'normal');
+    }
+}
+
+function swapTask(btn, swapType) {
+    //variable declarations
     let task_id = Number(btn.dataset.taskId);
-    let shift_up = btn.dataset.raise == 'true' ? true:false;
+    let shift_up = btn.dataset.raise == 'true';
     let element = document.getElementById(task_id);
     let parent_element = document.getElementById(element.dataset.parentTaskId);
     let parent_task = findTaskObject(Number(parent_element.id), parent_element.dataset.branch);
     let task_to_shift = findTaskObject(task_id, element.dataset.branch);
     let subtasks_array = (task_to_shift.complete ? parent_task.subtasks.complete : parent_task.subtasks.incomplete);
-    
-    //shifting logic
-    if(shift_up){
-        // Find index of task to shift
-        let index = subtasks_array.findIndex(t => t.id === task_id);
 
-        if (index > 0) {
-            // Remove task from current position
-            let [removed] = subtasks_array.splice(index, 1);
+    let index = subtasks_array.findIndex(t => t.id === task_id);
 
-            // Insert it back one position up
-            subtasks_array.splice(index - 1, 0, removed);
-        }
-    }else{
-        // Find index of task to shift
-        let index = subtasks_array.findIndex(t => t.id === task_id);
-
-        if (index < subtasks_array.length - 1) {
-            // Remove task from current position
-            let [removed] = subtasks_array.splice(index, 1);
-
-            // Insert it back one position down
-            subtasks_array.splice(index + 1, 0, removed);
-        }
+    switch(swapType) {
+        case 'shift':
+            // Logic for moving the task by 4 positions (5 feels weird)
+            if (shift_up) {
+                let newPos = Math.max(index - 4, 0); // Ensure newPos doesn't go below 0
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.splice(newPos, 0, removed);
+            } else {
+                let newPos = Math.min(index + 4, subtasks_array.length - 1); // Ensure newPos doesn't exceed array length
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.splice(newPos, 0, removed);
+            }
+            break;
+        case 'ctrl':
+            // Logic for moving the task to top/bottom
+            if (shift_up) {
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.unshift(removed); // Move to top
+            } else {
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.push(removed); // Move to bottom
+            }
+            break;
+        case 'normal':
+            // Existing shifting logic
+            if(shift_up && index > 0){
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.splice(index - 1, 0, removed);
+            } else if(!shift_up && index < subtasks_array.length - 1){
+                let [removed] = subtasks_array.splice(index, 1);
+                subtasks_array.splice(index + 1, 0, removed);
+            }
+            break;
     }
 
-    //now try sort
-    try{
+    // Existing sort and error handling
+    try {
         sortWithinBranchById(parent_task.id);
-    }catch{
+    } catch {
         console.log("Error: Sort operation failed (ID: " + parent_task.id + ")");
         return;
     }
 }
+
+// This function toggles the collapsed state of a task
+function toggleTaskCollapse(e) {
+    // Check if the click was on the left side of the div
+    if (e.offsetX <= 5) {
+        let container_div = e.target;
+        let task_id = Number(container_div.id);
+        let branch = container_div.dataset.branch;
+        let task_obj  = findTaskObject(task_id, branch);
+        let subtask_div = container_div.querySelector('.subtasks');
+        let add_task_div = container_div.querySelector('.add-task-div');
+
+        //wants to alternate based on initial value
+        if(task_obj.collapsed){
+            modifyTaskObject(task_id, branch, 'collapsed', false);
+        }else{
+            modifyTaskObject(task_id, branch, 'collapsed', true);
+        }
+
+        //proceed to toggle
+        subtask_div.classList.toggle('collapsed');
+        add_task_div.classList.toggle('collapsed');
+        container_div.classList.toggle('is-collapsed');
+
+        autosave();
+
+        /*
+        // Toggle the 'collapsed' class
+        //replace with code to access subtasks container
+        e.target.classList.toggle('collapsed');
+
+        // Update the 'collapsed' property of the task object
+        const task_id = Number(e.currentTarget.id);
+        const task = findTaskObject(task_id);
+        if (task) {
+            task.collapsed = !task.collapsed;
+            autosave(); // Save the new state
+        }
+        */
+    }
+}
+
 
 //checkbox clicked; if checked, hide task. if unchecked, unhide task.
 function toggleTaskCompletion(e){
@@ -213,6 +276,8 @@ function toggleTaskCompletion(e){
 
 		document.getElementById('sub-' + parent_task_id).appendChild(container_div);
 	}
+
+    autosave();
 }
 
 //self explanatory; flip state of showing completed tasks, add/remove hidden
@@ -474,6 +539,11 @@ function reloadTasks() {
         createDOMElement(task, mainContainer);
     });
     sortAllTasks();
+    if (show_completed) {
+		document.getElementById(0).querySelectorAll('.completed-tasks').forEach(task => {task.classList.remove('hidden');});
+	} else {
+		document.getElementById(0).querySelectorAll('.completed-tasks').forEach(task => {task.classList.add('hidden')});
+	}
 }
 
 // Helper function to create a DOM element for a task
@@ -487,7 +557,7 @@ function createDOMElement(task, parentElement) {
 
     // Create a new task element using the same template as in 'createTask'
     const template = `
-<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container' style='padding-left:${padding}em'>
+<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container ${task.collapsed ? 'is-collapsed' : ''}' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
 	<div class='task-content'>
 		<div class='task-text'>
             <div class='task-checkbox'><input type='checkbox' class="task-toggle" data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
@@ -496,12 +566,12 @@ function createDOMElement(task, parentElement) {
         <div class='task-buttons'>
 			<div class='edit-task-div'><button class='edit-task-btn' data-task-id='${task.id}' onclick='editTask(event)'>&#9998;</button></div>
 			<div class='del-task-div'><button class='del-task-btn' data-task-id='${task.id}' data-primed='false' onclick='deleteTask(event)'>&#10006;</button></div>
-			<button class='swap-button' data-raise='true' data-task-id='${task.id}' onclick='swapTask(event)'>▲</button>
-			<button class='swap-button' data-raise='false' data-task-id='${task.id}' onclick='swapTask(event)'>▼</button>
+			<button class='swap-button' data-raise='true' data-task-id='${task.id}' onclick='listenSwap(event)'>▲</button>
+			<button class='swap-button' data-raise='false' data-task-id='${task.id}' onclick='listenSwap(event)'>▼</button>
 		</div>
 	</div>
-    <div class='add-task-div'><button class='add-task-btn' data-task-id='${task.id}' data-branch='${task.branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
-    <div class='subtasks'>
+    <div class='add-task-div ${task.collapsed ? 'collapsed' : ''}'><button class='add-task-btn' data-task-id='${task.id}' data-branch='${task.branch}' onclick='createTask(event)'>+ Add subtask...</button></div>
+    <div class='subtasks ${task.collapsed ? 'collapsed' : ''}'>
         <div class='incompleted-tasks' id='sub-${task.id}' data-parent-task-id='${task.id}'></div>
         <div class='completed-tasks' id='comp-sub-${task.id}' data-parent-task-id='${task.id}'></div>
     </div>
@@ -557,7 +627,7 @@ function autosave(){
 // dynamic save data function, feed string for which, params for extra identifications, if needed (future slots prep)
 function saveData(destination, params) {
     if (destination === 'clipboard') {
-        const tasksJson = JSON.stringify({ tasks:tasks, task_increment:task_increment, autosave_enabled:autosave_enabled });
+        const tasksJson = JSON.stringify({ tasks:tasks, task_increment:task_increment, autosave_enabled:autosave_enabled, show_completed:show_completed });
         const base64TasksJson = btoa(tasksJson);
         // Save to clipboard
         navigator.clipboard.writeText(base64TasksJson).catch(() => {

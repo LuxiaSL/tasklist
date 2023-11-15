@@ -1,4 +1,7 @@
 /* Structural CSS */
+body{
+	background-color:#DCDDDD;
+}
 
 .button-container {
     display: flex;
@@ -14,9 +17,24 @@
 .task-container {
     display: flex;
     flex-direction: column;
-	border-left: 0.25em solid #ccc;
+	border-left: 0.33em solid #ccc;
 	margin-bottom: 0.4em;
 }
+.task-container:hover {
+    border-left: 0.33em solid #999;
+}
+.is-collapsed{
+	border-left: 0.33em solid #999;
+}
+.is-collapsed:hover{
+    border-left: 0.33em solid #666;
+}
+
+
+.collapsed {
+    display: none;
+}
+
 .task-container > div{
 	margin-bottom: 0.35em;
 }
@@ -115,21 +133,37 @@ background-color: #f0f0f0;
 }
 
 .task-toggle {
-	appearance: none;
-	width: 100%;
-	height: 100%;
-	background-color: #f2f2f2;
-	border: none;
-	cursor: pointer;
-  }
-  
-  .task-toggle:hover {
-	background-color: #e6e6e6;
-  }
-  
-  .task-toggle:checked {
-	background-color: #cccccc;
-  }
-  
-  
-  
+  appearance: none;
+  -webkit-appearance: none; 
+  -moz-appearance: none;    
+  width: 1.5em; 
+  height: 1.5em; 
+  background-color: #f2f2f2;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px; 
+  position: relative; 
+}
+
+.task-toggle:hover {
+  background-color: #e6e6e6;
+}
+
+.task-toggle:checked {
+  background-color: #cccccc;
+}
+
+.task-toggle:checked:hover{
+	background-color: #ababab;
+}
+
+/* Custom checkmark */
+.task-toggle:checked::after {
+  content: '✔';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000; /* or any color you prefer */
+  font-size: 1.05em; /* adjust size to fit within the checkbox */
+}
