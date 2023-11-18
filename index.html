@@ -3,12 +3,12 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Task List</title>
-	<script src='script.js'></script>
 	<link rel="stylesheet" href="styling.css">
 	<link rel="stylesheet" href="sakura_styling.css">
 	<link rel="icon" type="image/x-icon" href="blossom_purple_1.svg">
 </head>
 <body>
+	<div id="modals-container"></div>
 	<div class="button-container">
 		<div class='add-task-div'>
 			<button class="add-task-btn" id="main-task-add" data-task-id="0" data-branch="0" onclick="createTask(event)">New Task</button>
@@ -24,6 +24,8 @@
 		</div>
 		<div class="settings-div">
 			<label for="toggle-hidden">Show Completed</label>
+			<input type="checkbox" id="toggle-hidden" onclick="toggleShowCompleted()" />
+			<!--<button class="settings-btn" data-modal="settings" onclick="showModal(event)">&#9881;</button>  wait to use til fixed-->
 		</div>
 	</div>
 	<br>
@@ -33,9 +35,11 @@
 	</div>
 </body>
 </html>
+<script src='script.js'></script>
+<!-- <script src='modals.js'></script> wait to use til fixed-->
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		importData('browser');
-		document.querySelector('.settings-div').insertAdjacentHTML('beforeend', `<input type="checkbox" id="toggle-hidden" ${show_completed ? "checked" : ''} onclick="toggleShowCompleted()" />`);
+		document.getElementById('toggle-hidden').checked = show_completed;
 	});
 </script>

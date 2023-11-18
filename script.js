@@ -1,10 +1,16 @@
 /*
 todo: 
-custom window to popup instead of shitty browser one
-with above, settings which show goes into, as well as autosave, etc...  
-general modal for the above
+drag & drop
+
+general modal for settings, import/export, etc.
+
+save slot functionality; let people have infinite saves w/ names,  show in solo modal
+
+styling button with clickable color swabs as selection and then a blank end (in the future) for a custom option which will generate based off their color choice (somehow? will ask AI to compile function based on multiple different themes)
 
 details button, opens up large <area> below for extra details/description
+
+mobile implementation after finishing the above
 */
 
 // Initialize empty task array
@@ -24,7 +30,9 @@ function generateTaskTemplate(task) {
     let padding = (depth <= 0 ? 0 : 2);
 
     return `
-<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}' class='task-container ${task.collapsed ? 'is-collapsed' : ''}' onclick="toggleTaskCollapse(event)" style='padding-left:${padding}em'>
+<div id='${task.id}' data-branch='${task.branch}' data-parent-task-id='${task.parent_task_id}'
+    class='task-container ${task.collapsed ? 'is-collapsed' : ''}' style='padding-left:${padding}em'
+    onclick="toggleTaskCollapse(event)" >
     <div class='task-content'>
         <div class='task-text'>
             <div class='task-checkbox'><input type='checkbox' class="task-toggle" data-task-id='${task.id}' ${task.complete ? 'checked' : ''} onclick='toggleTaskCompletion(event)' /></div>
@@ -72,6 +80,7 @@ function createTask(e) {
 	document.getElementById(`sub-${parent_id}`).insertAdjacentHTML('beforeend', template);
 
     //put user in new task box
+    document.getElementById(`txt-${task_id}`).disabled=false;
     document.getElementById(`txt-${task_id}`).focus();
 
     // Find the parent task object

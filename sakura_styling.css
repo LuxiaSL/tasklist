@@ -3,6 +3,15 @@ body{
 	background-color:#FFD1DA;
 }
 
+.modal{
+	background-color: #F78FA7; 
+    border: 2px solid #F45C85; 
+}
+
+.modal-content {
+    background-color: #FFD1DA; /* Same as body background color */
+}
+
 .task-container {
 	border-left: 0.33em solid #F7BEC0;
 }
@@ -41,11 +50,11 @@ background-color: #F7BEC0;
 	background-color: #F45C85;
 }
 
-.edit-task-btn, .del-task-btn, .swap-button {
+.edit-task-btn, .del-task-btn, .swap-button, .settings-btn {
 	border: 1px solid #F7BEC0;
 }
 
-.edit-task-btn:hover, .del-task-btn:hover, .swap-button:hover {
+.edit-task-btn:hover, .del-task-btn:hover, .swap-button:hover, .settings-btn:hover{
 	background-color: #FEDFE1;
 }
 
